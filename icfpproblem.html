@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <style>
+            div {
+                /* background-image:url(http://www.google.com/intl/en_ALL/images/srpr/logo1w.png); */
+            }
+            canvas {
+                /* border-style: solid; */
+            }
+        </style>
+        <script type="text/javascript" src="known_problems.js"></script>
+    </head>
+
+    <body>
+        <div>
+        <canvas id="solution_canvas" width="300" height="300"></canvas>
+        <canvas id="problem_canvas" width="300" height="300"></canvas>
+
+        <textarea rows=20 cols=50 id=solutionTxt></textarea>
+        <input type=button id=generateBtn value=Generate onClick="generate();" />
+        <script type="text/javascript" src="icfpproblem.js"></script>
+        </div>
+
+        <div>
+            <div id=log></div>
+        </div>
+    </body>
+</html>
