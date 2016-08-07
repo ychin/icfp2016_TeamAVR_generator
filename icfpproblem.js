@@ -28,11 +28,11 @@ function drawLines(ctx, pts) {
 function parseFraction(text) {
     var outputNum;
     if (text.search('/') == -1) {
-        outputNum = parseInt(text);
+        outputNum = new Fraction(parseInt(text));
     }
     else {
         var textSplit = text.split('/');
-        outputNum = parseInt(textSplit[0]) / parseInt(textSplit[1]);
+        outputNum = new Fraction(parseInt(textSplit[0]) , parseInt(textSplit[1]));
     }
     return outputNum;
 }
@@ -92,8 +92,8 @@ function parseSolution(text) {
 function normalizePointToCanvas(pt, boundaryWidth) {
     var realWidth = canvasWidth - boundaryWidth * 2;
     return {
-        x : pt.x * realWidth + boundaryWidth,
-        y : pt.y * realWidth + boundaryWidth
+        x : pt.x.valueOf() * realWidth + boundaryWidth,
+        y : pt.y.valueOf() * realWidth + boundaryWidth
     };
 }
 
@@ -124,6 +124,8 @@ function generate() {
     var solutionTxt = document.getElementById('solutionTxt');
     var solution = parseSolution(solutionTxt.value);
     drawSolution(solution);
+
+    global.lastKnownSolution = solution; // for debugging
 }
 
 function log(text) {
