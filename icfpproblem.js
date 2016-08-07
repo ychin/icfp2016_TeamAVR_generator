@@ -160,6 +160,25 @@ function drawSolution(solution) {
 function displaySolution(solution) {
     var text = outputSolution(solution);
     document.getElementById('solutionTxt').value = text;
+    displaySizeOfSolution(text); 
+}
+
+function displaySizeOfSolution(text) {
+    var sizeOfSolution = 0;
+    for (var i = 0; i < text.length; i++) {
+        if (text[i] == ' ' || text[i] == '\n' || text[i] == '\t' || text[i] == '\r')
+            continue;
+        sizeOfSolution++;
+    }
+
+    document.getElementById('problemOutput').innerHTML = 'Size: ' + sizeOfSolution;
+}
+
+function updateSolution(solution) {
+    displaySolution(solution);
+    drawSolution(solution);
+    // To add later
+    //generateInteractiveRollover(solution);
 }
 
 function injectPtToSolution(solution, pt) {
@@ -169,6 +188,7 @@ function generate() {
     var solutionTxt = document.getElementById('solutionTxt');
     var solution = parseSolution(solutionTxt.value);
     drawSolution(solution);
+    displaySizeOfSolution(solutionTxt.value);
 
     global.lastKnownSolution = solution; // for debugging
 
@@ -181,8 +201,7 @@ function testFunc() {
     // This is for whatever debug testing for local testing
     var ratio = Math.random();
     splitFacets(lastKnownSolution, genPt(ratio,0), genPt(ratio,1));
-    drawSolution(lastKnownSolution);
-    displaySolution(lastKnownSolution);
+    updateSolution(lastKnownSolution);
 }
 
 function log(text) {
@@ -202,8 +221,7 @@ function addFoldFunc() {
     var flipPt1 = parsePt(document.getElementById('postFlipPt1').value);
     var flipPt2 = parsePt(document.getElementById('postFlipPt2').value);
     applyPostFlip(lastKnownSolution, flipPt1, flipPt2, flipRight);
-    drawSolution(lastKnownSolution);
-    displaySolution(lastKnownSolution);
+    updateSolution(lastKnownSolution);
 
     addUndo();
 }
@@ -228,8 +246,7 @@ function transformFunc() {
         s.dest = s.dest.map(function(p) { return calculateFlip(p, flipP1, flipP2); });
     }
 
-    drawSolution(lastKnownSolution);
-    displaySolution(lastKnownSolution);
+    updateSolution(lastKnownSolution);
 
     addUndo();
 }
@@ -244,8 +261,7 @@ function addUndo() {
 function applyUndo() {
     if (undoIndex >= 1) {
         var undoSolution = parseSolution(undoStack[undoIndex - 1]);
-        drawSolution(undoSolution);
-        displaySolution(undoSolution);
+        updateSolution(undoSolution);
         global.lastKnownSolution = undoSolution;
         undoIndex -= 1;
     }
@@ -253,8 +269,7 @@ function applyUndo() {
 function applyRedo() {
     if (undoIndex < undoStack.length - 1) {
         var undoSolution = parseSolution(undoStack[undoIndex+1]);
-        drawSolution(undoSolution);
-        displaySolution(undoSolution);
+        updateSolution(undoSolution);
         global.lastKnownSolution = undoSolution;
         undoIndex += 1;
     }
