@@ -163,6 +163,17 @@ function signOfPointOnLine(pt, line11, line12) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+// Flipping
+//
+function calculateFlip(vec) {
+    var x2 = vec.x.mul(vec.x);
+    var y2 = vec.y.mul(vec.y);
+    var w2 = (x2.mul(y2)) .div ( x2.add(y2) );
+    var newX = (x2.sub(w2.mul(2))) .div (vec.x);
+    return newX;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Operations
 //
 function splitFacets(solution, pt1, pt2) {
