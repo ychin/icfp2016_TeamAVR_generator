@@ -1,6 +1,7 @@
 var global = window;
 
-var canvasWidth=300;
+var canvasWidth=400;
+var canvasPadding=50;
 
 var undoStack = [];
 var undoIndex = 0;
@@ -39,6 +40,31 @@ function drawLines(ctx, pts, color, lineWidth) {
     ctx.stroke();
 }
 
+function drawGrid(ctx) {
+    for (var x = 0; x <= 4; x++) {
+        var points = [];
+        for (var y = 0; y <= 4; y++) {
+            var pt = {x:x/4,y:y/4};
+            points.push(pt);
+        }
+        var pointsUnNorm  = points.map(function(pt) {
+            return normalizePointToCanvas(pt, 2);
+        });
+        drawLines(ctx, pointsUnNorm, 'gray', 0.25);
+    }
+    for (var y = 0; y <= 4; y++) {
+        var points = [];
+        for (var x = 0; x <= 4; x++) {
+            var pt = {x:x/4,y:y/4};
+            points.push(pt);
+        }
+        var pointsUnNorm  = points.map(function(pt) {
+            return normalizePointToCanvas(pt, 2);
+        });
+        drawLines(ctx, pointsUnNorm, 'gray', 0.25);
+    }
+}
+
 function parseFraction(text) {
     var outputNum;
     if (text.search('/') == -1) {
@@ -64,9 +90,6 @@ function parseSolution(text) {
         positions: [],
         facets: [],
         dest: [],
-
-        // TODO: add solution size calculator
-        solutionSize: 0
     };
 
     var lines = text.split('\n').map(function(line) {return line.trim();}).filter(function(line) { if (line == "") return false; return true; });
@@ -146,6 +169,7 @@ function outputSolution(solution) {
 
 
 function normalizePointToCanvas(pt, boundaryWidth) {
+    boundaryWidth += canvasPadding;
     var realWidth = canvasWidth - boundaryWidth * 2;
     return {
         x : pt.x.valueOf() * realWidth + boundaryWidth,
@@ -156,6 +180,12 @@ function normalizePointToCanvas(pt, boundaryWidth) {
 function drawSolution(solution) {
     sctx.clearRect(0,0,canvasWidth,canvasWidth);
     pctx.clearRect(0,0,canvasWidth,canvasWidth);
+
+    if (global.displayShowGrid) {
+        drawGrid(sctx);
+        drawGrid(pctx);
+    }
+
     for (var i = 0; i < solution.facets.length; i++){
         var facet = solution.facets[i];
         var points = facet.map(function(ptIdx) { return solution.positions[ptIdx]; });
@@ -313,6 +343,13 @@ function testFunc() {
     var ratio = Math.random();
     splitFacets(lastKnownSolution, genPt(ratio,0), genPt(ratio,1));
     updateSolution(lastKnownSolution);
+}
+
+function applyShowGridFunc() {
+    var toShow = document.getElementById('showGridCheckbox').checked;
+    global.displayShowGrid = toShow;
+    if (global.lastKnownSolution)
+        drawSolution(lastKnownSolution);
 }
 
 function log(text) {
