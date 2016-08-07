@@ -271,7 +271,9 @@ function splitFacets(solution, pt1, pt2, useDest) {
                 // one of the points lie on the split line. Need to read ahead. If both on same sign, then no need to do anything as we basically wrapped around. Otherwise need to do something
                 if (sign1 == 0) {
                     var lastIndex = (j-1+facet.length) % facet.length;
-                    var prevSign = signOfPointOnLine( solution.positions[facet[lastIndex]], pt1, pt2 );
+                    var prevSign = signOfPointOnLine(
+                    useDest ? solution.dest[facet[lastIndex]] : solution.positions[facet[lastIndex]],
+                    pt1, pt2 );
                     if (prevSign ==sign2) {
                         // Both one the same side
                         continue;
