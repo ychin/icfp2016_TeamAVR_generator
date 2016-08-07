@@ -27,6 +27,7 @@
             <input type=button id=generateBtn value="Load" onClick="generate();" />
             <select id=defaultOpsSelect onchange="selectDefaultOps();"><option></option></select>
             <input type=button id=generateBtn value="Run Ops" onClick="runOps();" />
+            <input type=button id=generateBtn value="Run Ops (detailed undo)" onClick="runOps(true);" />
             <input type=button id=testBtn value="Test Only" onClick="testFunc();" />
             <label> <input type=checkbox id=showGridCheckbox onchange="applyShowGridFunc();" />Show Grid </label>
         </div>
@@ -44,6 +45,10 @@
                 <input id=translateOffset value="" placeholder="Translate: x,y" />
                 <input id=flipAlong1 value="" placeholder="Flip line p1: x,y" />
                 <input id=flipAlong2 value="" placeholder="Flip line p2: x,y" />
+            </form>
+            <form onsubmit="tilingFunc();return false;" action="javascript:">
+                <input type=submit value="Tile" />
+                <input id=tilingValue value="" placeholder="Tiling: <num>" />
             </form>
         </div>
         <div>

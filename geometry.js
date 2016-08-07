@@ -354,6 +354,11 @@ function splitFacets(solution, pt1, pt2, useDest, onlyInsideLineSegment) {
             i += 1;
         }
     }
+
+    if (useDest) {
+        // This could lead to duplicate points since we're working backward. Just use heavy handed way now
+        handleDuplicateSrcPts(solution.positions, solution.facets, solution.dest);
+    }
 }
 
 function applyPostFlip(solution, pt1, pt2, flip) {
@@ -516,18 +521,15 @@ function generateScaledVersion(solution, scale, offset, flipX, flipY) {
     };
 }
 
-function mergeSolutions(solutions) {
-    var concatPositions = [].concat.apply([], solutions.map(function(s) {return s.positions;}));
-    var concatDest = [].concat.apply([], solutions.map(function(s) {return s.dest;}));
-
+function handleDuplicateSrcPts(positions, facets, destinations) {
     var mappedPosIndices = [];
     var duplicatePosIndices = [];
-    for (var i = 0; i < concatPositions.length; i++) {
-        var curPos = concatPositions[i];
+    for (var i = 0; i < positions.length; i++) {
+        var curPos = positions[i];
 
         var foundDuplicate = false;
         for (var j = 0; j < mappedPosIndices.length; j++) {
-            var mappedPos = concatPositions[mappedPosIndices[j]];
+            var mappedPos = positions[mappedPosIndices[j]];
             if (equalsPt(curPos,mappedPos)) {
                 duplicatePosIndices.push({dup: i, orig:mappedPosIndices[j]});
                 foundDuplicate = true;
@@ -538,6 +540,45 @@ function mergeSolutions(solutions) {
             mappedPosIndices.push(i);
         }
     }
+
+    // Deal with duplicates. just do it here since it's easier instead of any clever in-place stuff
+    var curDupIndex = 0;
+    for (var i = 0; i < positions.length && curDupIndex < duplicatePosIndices.length; i++) {
+        if (i == duplicatePosIndices[curDupIndex].dup) {
+            positions.splice(i, 1);
+            destinations.splice(i, 1);
+
+            for (var j = 0; j < duplicatePosIndices.length; j++) {
+                var curDup = duplicatePosIndices[j];
+                if (curDup.orig > i) {
+                    curDup.orig -= 1;
+                }
+                if (curDup.dup > i) {
+                    curDup.dup -= 1;
+                }
+            }
+
+            for (var j = 0; j < facets.length;j++) {
+                var curFacet = facets[j];
+                for (var k = 0; k < curFacet.length; k++) {
+                    if (curFacet[k] == i) {
+                        curFacet[k] = duplicatePosIndices[curDupIndex].orig;
+                    }
+                    else if (curFacet[k] > i) {
+                        curFacet[k] -= 1;
+                    }
+                }
+            }
+            
+            curDupIndex += 1;
+            i -= 1;
+        }
+    }
+}
+
+function mergeSolutions(solutions) {
+    var concatPositions = [].concat.apply([], solutions.map(function(s) {return s.positions;}));
+    var concatDest = [].concat.apply([], solutions.map(function(s) {return s.dest;}));
 
     var concatFacets = [];
     var curFacetOffset = 0;
@@ -554,39 +595,7 @@ function mergeSolutions(solutions) {
         curFacetOffset += s.positions.length;
     }
 
-    // Deal with duplicates. just do it here since it's easier instead of any clever in-place stuff
-    var curDupIndex = 0;
-    for (var i = 0; i < concatPositions.length && curDupIndex < duplicatePosIndices.length; i++) {
-        if (i == duplicatePosIndices[curDupIndex].dup) {
-            concatPositions.splice(i, 1);
-            concatDest.splice(i, 1);
-
-            for (var j = 0; j < duplicatePosIndices.length; j++) {
-                var curDup = duplicatePosIndices[j];
-                if (curDup.orig > i) {
-                    curDup.orig -= 1;
-                }
-                if (curDup.dup > i) {
-                    curDup.dup -= 1;
-                }
-            }
-
-            for (var j = 0; j < concatFacets.length;j++) {
-                var curFacet = concatFacets[j];
-                for (var k = 0; k < curFacet.length; k++) {
-                    if (curFacet[k] == i) {
-                        curFacet[k] = duplicatePosIndices[curDupIndex].orig;
-                    }
-                    else if (curFacet[k] > i) {
-                        curFacet[k] -= 1;
-                    }
-                }
-            }
-            
-            curDupIndex += 1;
-            i -= 1;
-        }
-    }
+    handleDuplicateSrcPts(concatPositions, concatFacets, concatDest);
 
     return {
         positions: concatPositions,

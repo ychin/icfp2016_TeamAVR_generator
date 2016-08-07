@@ -264,7 +264,12 @@ function displaySizeOfSolution(text) {
         sizeOfSolution++;
     }
 
-    document.getElementById('problemOutput').innerHTML = 'Solution size: ' + sizeOfSolution;
+    var elem = document.getElementById('problemOutput');
+    elem.innerHTML = 'Solution size: ' + sizeOfSolution;
+
+    if (sizeOfSolution > 5000) {
+        elem.innerHTML += '<div><b><h2>SOLUTION SIZE TOO BIG!</h2></b></div>';
+    }
 }
 
 function updateSolution(solution) {
@@ -335,7 +340,7 @@ function generate() {
     addUndo();
 }
 
-function runOps() {
+function runOps(detailedUndo) {
     var opsTxt = document.getElementById('operationsTxt');
     var ops = JSON.parse(opsTxt.value);
 
@@ -347,17 +352,26 @@ function runOps() {
         if (op.type == 'fold') {
             applyPostFlip(lastKnownSolution, parsePt(op.line[0]), parsePt(op.line[1]), op.right);
         }
+
+        if (detailedUndo)
+            addUndo();
     }
 
     updateSolution(lastKnownSolution);
-    addUndo();
+    if (!detailedUndo)
+        addUndo();
 }
 
 function testFunc() {
-    // This is for whatever debug testing for local testing
-    var ratio = Math.random();
-    splitFacets(lastKnownSolution, genPt(ratio,0), genPt(ratio,1));
-    updateSolution(lastKnownSolution);
+    global.meh = null;
+    for (var i =0 ; i < lastKnownSolution.positions.length; i++) { for (var j = 0; j < lastKnownSolution.positions.length;j++) {
+        if (i != j && equalsPt(lastKnownSolution.positions[i], lastKnownSolution.positions[j])) {
+            global.meh=[i,j];
+            break;
+        }
+    }}
+    if (global.meh != null)
+        alert(global.meh);
 }
 
 function applyShowGridFunc() {
@@ -418,6 +432,19 @@ function transformFunc() {
 
     updateSolution(lastKnownSolution);
 
+    addUndo();
+}
+
+function tilingFunc() {
+    var s = lastKnownSolution;
+
+    var numTiling = parseInt(document.getElementById('tilingValue').value);
+    if (numTiling < 1 || isNaN(numTiling)) { return; }
+
+    var newS = generateTilingSolutions(s, numTiling);
+
+    lastKnownSolution = newS;
+    updateSolution(lastKnownSolution);
     addUndo();
 }
 
