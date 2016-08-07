@@ -119,7 +119,7 @@ function pointOnLineT(line11, line12, pt) {
 }
 
 function isPointOnLine(line11, line12, pt) {
-    return pointOnLineT(line11, 12, pt) != null;
+    return pointOnLineT(line11, line12, pt) != null;
 }
 
 function crossProduct(v1, v2) {
@@ -165,18 +165,78 @@ function signOfPointOnLine(pt, line11, line12) {
 ////////////////////////////////////////////////////////////////////////////////
 // Flipping
 //
-function calculateFlip(vec) {
+function calculateFlip(pt, line11, line12) {
+    if (isPointOnLine(line11, line12, pt)) {
+        return pt;
+    }
+
+    // Handle the trivial cases first
+    if (line11.x.equals(line12.x)) { // x==0
+        var delta = line11.x.sub(pt.x).mul(2);
+        return { x: pt.x.add(delta), y: pt.y }
+    }
+    if (line11.y.equals(line12.y)) { // y==0
+        var delta = line11.y.sub(pt.y).mul(2);
+        return { x: pt.x, y: pt.y.add(delta) };
+    }
+
+    // Not horiz/vertical lines. Use right angle flips
+    var xdeltaT = {};
+    lineIntersecton(pt, {x:pt.x.sub(1), y:pt.y}, line11,line12, xdeltaT);
+    var ydeltaT = {};
+    lineIntersecton(pt, {x:pt.x, y:pt.y.add(1)}, line11,line12, ydeltaT);
+
+    var distX = xdeltaT.t1;
+    var distY = ydeltaT.t1;
+    
+    var delta = calculateRightAngleTriFlip({x: distX, y: distY});
+    return addPt(pt, delta);
+}
+
+function calculateRightAngleTriFlip(vec) { 
+    if (vec.x.compare(0) < 0 && vec.y.compare(0) < 0) { // x < 0, y < 0
+        var flippedFlip = calculateRightAngleTriFlip({x:vec.x.neg(), y:vec.y.neg()});
+        return {
+            x: flippedFlip.x.neg(),
+            y: flippedFlip.y.neg()
+        };
+    }
+    if (vec.x.compare(0) < 0) { // x < 0
+        var flippedFlip = calculateRightAngleTriFlip({x:vec.x.neg(), y:vec.y});
+        return {
+            x: flippedFlip.x.neg(),
+            y: flippedFlip.y
+        };
+    }
+    if (vec.y.compare(0) < 0) { // y < 0
+        var flippedFlip = calculateRightAngleTriFlip({x:vec.x, y:vec.y.neg()});
+        return {
+            x: flippedFlip.x,
+            y: flippedFlip.y.neg()
+        };
+    }
+    if (vec.x.compare(vec.y) < 0) { // x < y
+        var flippedFlip = calculateRightAngleTriFlip({x:vec.y, y:vec.x});
+        return {
+            x: flippedFlip.y.neg(),
+            y: flippedFlip.x.neg()
+        };
+    }
+
+
+    // assumption, x >= y, x > 0, y > 0. Basically given right triangle at (0,0), (x,0), (0,y), flip (x,y) around the diagonal, give the new point relative to (x,y)
     var x2 = vec.x.mul(vec.x);
     var y2 = vec.y.mul(vec.y);
     var w2 = (x2.mul(y2)) .div ( x2.add(y2) );
     var newX = (x2.sub(w2.mul(2))) .div (vec.x);
-    return newX;
+    var newY = vec.y.mul(2) .sub( y2.mul(vec.y).mul(2).div(x2.add(y2)) );
+    return { x: newX.sub(vec.x), y: newY };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Operations
 //
-function splitFacets(solution, pt1, pt2) {
+function splitFacets(solution, pt1, pt2, useDest) {
     // Assumption: (pt1, pt2) are from boundary. I.e. we can't split in the middle
     // TODO: is this always true? We don't have to respond physical paper properties
     for (var i = 0; i < solution.facets.length; i++) {
@@ -186,8 +246,13 @@ function splitFacets(solution, pt1, pt2) {
 
         for (var j = 0; j < facet.length; j++) {
             var nextJ = (j+1) % facet.length;
-            var facetPt1 = solution.positions[facet[j]];
-            var facetPt2 = solution.positions[facet[nextJ]];
+            var facetSrcPt1 = solution.positions[facet[j]];
+            var facetSrcPt2 = solution.positions[facet[nextJ]];
+            var facetDestPt1 = solution.dest[facet[j]];
+            var facetDestPt2 = solution.dest[facet[nextJ]];
+
+            var facetPt1 = useDest ? facetDestPt1 : facetSrcPt1;
+            var facetPt2 = useDest ? facetDestPt2 : facetSrcPt2;
 
             var sign1 = signOfPointOnLine(facetPt1, pt1, pt2);
             var sign2 = signOfPointOnLine(facetPt2, pt1, pt2);
@@ -227,9 +292,9 @@ function splitFacets(solution, pt1, pt2) {
                 // line crosses over the two facet points
                 var t1t2 = {};
                 lineIntersecton(facetPt1, facetPt2, pt1, pt2, t1t2);
-                var newPos = lerpPt(facetPt1, facetPt2, t1t2.t1);
+                var newPos = lerpPt(facetSrcPt1, facetSrcPt2, t1t2.t1);
                 solution.positions.push(newPos);
-                var newDestPos = lerpPt(solution.dest[facet[j]], solution.dest[facet[nextJ]], t1t2.t1);
+                var newDestPos = lerpPt(facetDestPt1, facetDestPt2, t1t2.t1);
                 solution.dest.push(newDestPos);
 
                 facet.splice(j + 1, 0, solution.positions.length - 1);
@@ -262,6 +327,21 @@ function splitFacets(solution, pt1, pt2) {
             solution.facets.splice(i, 1, newFacet1, newFacet2);
 
             i += 1;
+        }
+    }
+}
+
+function applyPostFlip(solution, pt1, pt2, flip) {
+    splitFacets(solution, pt1, pt2, true);
+    
+    for (var i = 0; i < solution.positions.length; i++) {
+        var pos = solution.positions[i];
+        var destPos = solution.dest[i];
+        
+        var sign = signOfPointOnLine(destPos, pt1, pt2);
+        if ((!flip && sign > 0) || (flip && sign < 0)) {
+            var newDestPt = calculateFlip(destPos, pt1, pt2);
+            solution.dest[i] = newDestPt;
         }
     }
 }

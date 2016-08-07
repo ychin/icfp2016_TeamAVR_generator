@@ -85,12 +85,16 @@ function parseSolution(text) {
 
 
 function outputFrac(num) {
+    var output = '';
+    if (num.s < 0)
+        output = '-';
     if (num.d == 1) {
-        return num.n + '';
+        output += num.n + '';
     }
     else {
-        return num.n + '/' + num.d;
+        output += num.n + '/' + num.d;
     }
+    return output;
 }
 
 function outputPt(pt) {
