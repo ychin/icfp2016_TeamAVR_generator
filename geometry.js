@@ -17,6 +17,9 @@ function subPt(pt1, pt2) {
 function mulPt(pt1, pt2) {
     return { x: pt1.x.mul(pt2.x), y: pt1.y.mul(pt2.y) };
 }
+function scalePt(pt, scalar) {
+    return { x: pt.x.mul(scalar), y: pt.y.mul(scalar) };
+}
 function divPt(pt1, pt2) {
     return { x: pt1.x.div(pt2.x), y: pt1.y.div(pt2.y) };
 }
@@ -481,3 +484,140 @@ function applyPostPullOpen(solution, pt1, pt2, flip) {
         solution.dest[i] = newDestPt;
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Scaling
+//
+function generateScaledVersion(solution, scale, offset, flipX, flipY) {
+    var newPositions = [];
+    for (var i = 0; i < solution.positions.length; i++) {
+        var pos = solution.positions[i];
+        if (flipX) {
+            pos = {x: pos.x.neg().add(1), y: pos.y };
+        }
+        if (flipY) {
+            pos = {x:pos.x, y: pos.y.neg().add(1) };
+        }
+        var transformedPt = addPt(scalePt(pos, scale), offset);
+        newPositions.push(transformedPt);
+    }
+
+    var newDests = [];
+    for (var i = 0; i < solution.dest.length; i++) {
+        var pos = solution.dest[i];
+        var transformedPt = scalePt(pos, scale);
+        newDests.push(transformedPt);
+    }
+
+    return {
+        positions: newPositions,
+        facets: solution.facets,
+        dest: newDests
+    };
+}
+
+function mergeSolutions(solutions) {
+    var concatPositions = [].concat.apply([], solutions.map(function(s) {return s.positions;}));
+    var concatDest = [].concat.apply([], solutions.map(function(s) {return s.dest;}));
+
+    var mappedPosIndices = [];
+    var duplicatePosIndices = [];
+    for (var i = 0; i < concatPositions.length; i++) {
+        var curPos = concatPositions[i];
+
+        var foundDuplicate = false;
+        for (var j = 0; j < mappedPosIndices.length; j++) {
+            var mappedPos = concatPositions[mappedPosIndices[j]];
+            if (equalsPt(curPos,mappedPos)) {
+                duplicatePosIndices.push({dup: i, orig:mappedPosIndices[j]});
+                foundDuplicate = true;
+                break;
+            }
+        }
+        if (!foundDuplicate) {
+            mappedPosIndices.push(i);
+        }
+    }
+
+    var concatFacets = [];
+    var curFacetOffset = 0;
+    for (var i = 0; i < solutions.length; i++) {
+        var s = solutions[i];
+        var curFacets = s.facets.slice();
+        for (var j = 0; j < curFacets.length; j++) {
+            var newFacet = curFacets[j].slice();
+            for (var k = 0; k < newFacet.length; k++) {
+                newFacet[k] += curFacetOffset;
+            }
+            concatFacets.push(newFacet);
+        }
+        curFacetOffset += s.positions.length;
+    }
+
+    // Deal with duplicates. just do it here since it's easier instead of any clever in-place stuff
+    var curDupIndex = 0;
+    for (var i = 0; i < concatPositions.length && curDupIndex < duplicatePosIndices.length; i++) {
+        if (i == duplicatePosIndices[curDupIndex].dup) {
+            concatPositions.splice(i, 1);
+            concatDest.splice(i, 1);
+
+            for (var j = 0; j < duplicatePosIndices.length; j++) {
+                var curDup = duplicatePosIndices[j];
+                if (curDup.orig > i) {
+                    curDup.orig -= 1;
+                }
+                if (curDup.dup > i) {
+                    curDup.dup -= 1;
+                }
+            }
+
+            for (var j = 0; j < concatFacets.length;j++) {
+                var curFacet = concatFacets[j];
+                for (var k = 0; k < curFacet.length; k++) {
+                    if (curFacet[k] == i) {
+                        curFacet[k] = duplicatePosIndices[curDupIndex].orig;
+                    }
+                    else if (curFacet[k] > i) {
+                        curFacet[k] -= 1;
+                    }
+                }
+            }
+            
+            curDupIndex += 1;
+            i -= 1;
+        }
+    }
+
+    return {
+        positions: concatPositions,
+        facets: concatFacets,
+        dest: concatDest
+    };
+}
+
+function generateTilingSolutions(solution, numTiling) {
+    var scaleFactor = (new Fraction(numTiling)).inverse();
+    var newSolutions = [];
+    for (var i = 0; i < numTiling; i++) {
+        for (var j = 0; j < numTiling; j++) {
+            var newSolution = generateScaledVersion(solution, scaleFactor, { x: scaleFactor.mul(i), y: scaleFactor.mul(j) }, (i % 2) == 1, (j % 2) == 1);
+            newSolutions.push(newSolution);
+        }
+    }
+
+    var mergedSolution = mergeSolutions(newSolutions);
+    return mergedSolution;
+}
+
+function oneFourthSolution(solution) {
+    var newSolutions = [
+        generateScaledVersion(solution, new Fraction(0.5), genPt(0  ,0), false, false),
+        generateScaledVersion(solution, new Fraction(0.5), genPt(0.5,0), true, false),
+        generateScaledVersion(solution, new Fraction(0.5), genPt(0  ,0.5), false, true),
+        generateScaledVersion(solution, new Fraction(0.5), genPt(0.5,0.5), true, true) ];
+
+    var mergedSolution = mergeSolutions(newSolutions);
+    return mergedSolution;
+}
+
+

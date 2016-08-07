@@ -471,6 +471,9 @@ function OnLoad() {
     drawLine(sctx, canvasWidth,0, 0, canvasWidth);
     drawLine(pctx, 0,0, canvasWidth, canvasWidth);
     drawLine(pctx, canvasWidth,0, 0, canvasWidth);
+
+    selectDefaultProblem();
+    generate();
 }
 
 OnLoad();
