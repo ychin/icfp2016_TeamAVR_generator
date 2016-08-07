@@ -297,7 +297,10 @@ function generateInteractiveRollover(solution) {
     var output = "<div>Positions</div>";
     for (var i = 0; i < solution.positions.length; i++) {
         var pos = solution.positions[i];
-        output += '<div><a href=javascript: onmouseover="interactiveRolloverPos(' + i + ');" >(' + outputPt(pos) + ')</a></div>';
+        output += '<div><b>' + i + ':</b> <a href=javascript: onmouseover="interactiveRolloverPos(' + i + ');" >(' + outputPt(pos) + ')</a>';
+        var destPos = solution.dest[i];
+        output += ' &rArr; <a href=javascript: onmouseover="interactiveRolloverPos(' + i + ',true);" >(' + outputPt(destPos) + ')</a>';
+        output += '</div>';
     }
 
     output += "<hr/><div>Facets</div>";
@@ -308,12 +311,6 @@ function generateInteractiveRollover(solution) {
             output += ' <a href=javascript: onmouseover="interactiveRolloverFacet(' + i + ', ' + facet[j] + ');" >' + facet[j] + '</a>';
         }
         output += '</div>';
-    }
-
-    output += "<hr /><div>Destination Positions</div>";
-    for (var i = 0; i < solution.positions.length; i++) {
-        var pos = solution.dest[i];
-        output += '<div><a href=javascript: onmouseover="interactiveRolloverPos(' + i + ', true);" >(' + outputPt(pos) + ')</a></div>';
     }
 
     rolloverElem.innerHTML = output;
