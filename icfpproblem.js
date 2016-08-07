@@ -23,13 +23,21 @@ function drawLines(ctx, pts) {
 function parseFraction(text) {
     var outputNum;
     if (text.search('/') == -1) {
-        outputNum = new Fraction(parseInt(text));
+        outputNum = new Fraction(parseFloat(text));
     }
     else {
         var textSplit = text.split('/');
         outputNum = new Fraction(parseInt(textSplit[0]) , parseInt(textSplit[1]));
     }
     return outputNum;
+}
+
+function parsePt(text) {
+    var curLineSplit = text.split(',');
+    return {
+        x: parseFraction(curLineSplit[0]),
+        y: parseFraction(curLineSplit[1])
+    };
 }
 
 function parseSolution(text) {
@@ -49,11 +57,7 @@ function parseSolution(text) {
     var numPos = parseInt(lines[currentIndex++]);
     for (var i = 0; i < numPos; i++) {
         var curLine = lines[currentIndex++];
-        var curLineSplit = curLine.split(',');
-        output.positions.push({
-            x: parseFraction(curLineSplit[0]),
-            y: parseFraction(curLineSplit[1])
-        });
+        output.positions.push(parsePt(curLine));
     }
 
     var numFacets = parseInt(lines[currentIndex++]);
@@ -73,11 +77,7 @@ function parseSolution(text) {
 
     for (var i = 0; i < numPos; i++) {
         var curLine = lines[currentIndex++];
-        var curLineSplit = curLine.split(',');
-        output.dest.push({
-            x: parseFraction(curLineSplit[0]),
-            y: parseFraction(curLineSplit[1])
-        });
+        output.dest.push(parsePt(curLine));
     }
 
     return output;
@@ -188,6 +188,19 @@ function selectDefaultProblem() {
     var solution = known_solutions[text];
     var solutionTxt = document.getElementById('solutionTxt');
     solutionTxt.value = solution.trim();
+}
+
+function addFoldFunc() {
+    var flipRight = document.getElementById('postFlipRight').checked;
+    var flipPt1 = parsePt(document.getElementById('postFlipPt1').value);
+    var flipPt2 = parsePt(document.getElementById('postFlipPt2').value);
+    applyPostFlip(lastKnownSolution, flipPt1, flipPt2, !flipRight);
+    drawSolution(lastKnownSolution);
+    displaySolution(lastKnownSolution);
+}
+
+function applyFoldFlipRight() {
+    // Doesn't do anything
 }
 
 function OnLoad() {
