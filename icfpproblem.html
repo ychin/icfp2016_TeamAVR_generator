@@ -26,10 +26,16 @@
             <input type=button id=testBtn value="Test Only" onClick="testFunc();" />
         </div>
         <div>
-            <input type=button id=postFlipBtn value="Add Fold" onClick="addFoldFunc();" />
+            <form onsubmit="addFoldFunc();return false;" action="javascript:">
+            <input type=submit id=postFlipBtn value="Add Fold" />
             <input id=postFlipPt1 value="0,1/4" />
             <input id=postFlipPt2 value="1,1/4" />
-            <label> <input type=checkbox id=postFlipRight checked=true onchange="applyFoldFlipRight();" /> Fold right </label>
+            <label> <input type=checkbox id=postFlipRight onchange="applyFoldFlipRight();" /> Fold right </label>
+            </form>
+        </div>
+        <div>
+            <input type=button value="Undo" onClick="applyUndo();" />
+            <input type=button value="Redo" onClick="applyRedo();" />
         </div>
 
         <div>

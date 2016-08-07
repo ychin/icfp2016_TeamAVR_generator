@@ -2,6 +2,9 @@ var global = window;
 
 var canvasWidth=300;
 
+var undoStack = [];
+var undoIndex = 0;
+
 function drawLine(ctx, x1, y1, x2, y2) {
     ctx.beginPath();
     ctx.moveTo(x1, y1);
@@ -168,6 +171,10 @@ function generate() {
     drawSolution(solution);
 
     global.lastKnownSolution = solution; // for debugging
+
+    undoStack = [];
+    undoIndex = -1;
+    addUndo();
 }
 
 function testFunc() {
@@ -194,13 +201,41 @@ function addFoldFunc() {
     var flipRight = document.getElementById('postFlipRight').checked;
     var flipPt1 = parsePt(document.getElementById('postFlipPt1').value);
     var flipPt2 = parsePt(document.getElementById('postFlipPt2').value);
-    applyPostFlip(lastKnownSolution, flipPt1, flipPt2, !flipRight);
+    applyPostFlip(lastKnownSolution, flipPt1, flipPt2, flipRight);
     drawSolution(lastKnownSolution);
     displaySolution(lastKnownSolution);
+
+    addUndo();
 }
 
 function applyFoldFlipRight() {
     // Doesn't do anything
+}
+
+function addUndo() {
+    var lastSolution = outputSolution(lastKnownSolution);
+    undoStack.push(lastSolution);
+    undoIndex += 1;
+    undoStack.length = undoIndex + 1;
+}
+
+function applyUndo() {
+    if (undoIndex >= 1) {
+        var undoSolution = parseSolution(undoStack[undoIndex - 1]);
+        drawSolution(undoSolution);
+        displaySolution(undoSolution);
+        global.lastKnownSolution = undoSolution;
+        undoIndex -= 1;
+    }
+}
+function applyRedo() {
+    if (undoIndex < undoStack.length - 1) {
+        var undoSolution = parseSolution(undoStack[undoIndex+1]);
+        drawSolution(undoSolution);
+        displaySolution(undoSolution);
+        global.lastKnownSolution = undoSolution;
+        undoIndex += 1;
+    }
 }
 
 function OnLoad() {
