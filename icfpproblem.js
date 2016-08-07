@@ -84,6 +84,44 @@ function parseSolution(text) {
 }
 
 
+function outputFrac(num) {
+    if (num.d == 1) {
+        return num.n + '';
+    }
+    else {
+        return num.n + '/' + num.d;
+    }
+}
+
+function outputPt(pt) {
+    return outputFrac(pt.x) + ',' + outputFrac(pt.y);
+}
+
+function outputSolution(solution) {
+    var output = '';
+    output += solution.positions.length;
+    for (var i = 0; i < solution.positions.length; i++) {
+        var pos = solution.positions[i];
+        output += '\n' + outputPt(pos);
+    }
+
+    output += '\n' + solution.facets.length;
+    for (var i = 0; i < solution.facets.length; i++) {
+        var facet = solution.facets[i];
+        output += '\n' + facet.length;
+        for (var j = 0; j < facet.length; j++) {
+            output += ' ' + facet[j];
+        }
+    }
+
+    for (var i = 0; i < solution.dest.length; i++) {
+        output += '\n' + outputPt(solution.dest[i]);
+    }
+
+    return output;
+}
+
+
 function normalizePointToCanvas(pt, boundaryWidth) {
     var realWidth = canvasWidth - boundaryWidth * 2;
     return {
@@ -112,6 +150,11 @@ function drawSolution(solution) {
     }
 }
 
+function displaySolution(solution) {
+    var text = outputSolution(solution);
+    document.getElementById('solutionTxt').value = text;
+}
+
 function injectPtToSolution(solution, pt) {
 }
 
@@ -125,8 +168,10 @@ function generate() {
 
 function testFunc() {
     // This is for whatever debug testing for local testing
-    splitFacets(lastKnownSolution, genPt(0.5,0), genPt(0.5,1));
+    var ratio = Math.random();
+    splitFacets(lastKnownSolution, genPt(ratio,0), genPt(ratio,1));
     drawSolution(lastKnownSolution);
+    displaySolution(lastKnownSolution);
 }
 
 function log(text) {
