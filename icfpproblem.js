@@ -352,6 +352,9 @@ function runOps(detailedUndo) {
         if (op.type == 'fold') {
             applyPostFlip(lastKnownSolution, parsePt(op.line[0]), parsePt(op.line[1]), op.right);
         }
+        if (op.type == 'tile') {
+            lastKnownSolution = generateTilingSolutions(lastKnownSolution, op.num);
+        }
 
         if (detailedUndo)
             addUndo();
