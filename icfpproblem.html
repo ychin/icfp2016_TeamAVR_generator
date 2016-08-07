@@ -10,6 +10,7 @@
         </style>
         <script type="text/javascript" src="Fraction.js/fraction.js"></script>
         <script type="text/javascript" src="known_solutions.js"></script>
+        <script type="text/javascript" src="geometry.js"></script>
     </head>
 
     <body>
@@ -21,7 +22,8 @@
         </div>
         <div>
             <select id=defaultProblemSelect onchange="selectDefaultProblem();"></select>
-            <input type=button id=generateBtn value=Generate onClick="generate();" />
+            <input type=button id=generateBtn value="Run!" onClick="generate();" />
+            <input type=button id=testBtn value="Test Only" onClick="testFunc();" />
         </div>
 
         <div>

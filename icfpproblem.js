@@ -88,7 +88,7 @@ function normalizePointToCanvas(pt, boundaryWidth) {
     var realWidth = canvasWidth - boundaryWidth * 2;
     return {
         x : pt.x.valueOf() * realWidth + boundaryWidth,
-        y : pt.y.valueOf() * realWidth + boundaryWidth
+        y : (1-pt.y.valueOf()) * realWidth + boundaryWidth
     };
 }
 
@@ -121,6 +121,12 @@ function generate() {
     drawSolution(solution);
 
     global.lastKnownSolution = solution; // for debugging
+}
+
+function testFunc() {
+    // This is for whatever debug testing for local testing
+    splitFacets(lastKnownSolution, genPt(0.5,0), genPt(0.5,1));
+    drawSolution(lastKnownSolution);
 }
 
 function log(text) {
