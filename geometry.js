@@ -23,6 +23,9 @@ function divPt(pt1, pt2) {
 function addPt(pt1, pt2) {
     return { x: pt1.x.add(pt2.x), y: pt1.y.add(pt2.y) };
 }
+function equalsPt(pt1, pt2) {
+    return pt1.x.equals(pt2.x) && pt1.y.equals(pt2.y);
+}
 
 function genPt(x, y) {
     return {

@@ -13,13 +13,29 @@ function drawLine(ctx, x1, y1, x2, y2) {
     ctx.stroke();
 }
 
-function drawLines(ctx, pts) {
+function drawLines(ctx, pts, color, lineWidth) {
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pts[0].y);
     for (var i = 1; i < pts.length; i++) {
         ctx.lineTo(pts[i].x, pts[i].y);
     }
     ctx.closePath();
+
+    if (color !== undefined) {
+        ctx.strokeStyle = color;
+    }
+    else {
+        ctx.strokeStyle = 'black';
+    }
+
+    if (lineWidth !== undefined) {
+        ctx.lineWidth = lineWidth;
+    }
+    else {
+        ctx.lineWidth = 1;
+    }
+
+
     ctx.stroke();
 }
 
@@ -155,6 +171,53 @@ function drawSolution(solution) {
         });
         drawLines(pctx, destPtUnNorm);
     }
+
+    if (global.interactiveRolloverPosIdx !== undefined) {
+        var ptSrc = solution.positions[global.interactiveRolloverPosIdx];
+        var ptDest = solution.dest[global.interactiveRolloverPosIdx];
+        var unnormaPtSrc = normalizePointToCanvas(ptSrc, 2);
+        var unnormaPtDest = normalizePointToCanvas(ptDest, 2);
+        sctx.fillRect(unnormaPtSrc.x - 5, unnormaPtSrc.y - 5, 10, 10);
+        pctx.fillRect(unnormaPtDest.x - 5, unnormaPtDest.y - 5, 10, 10);
+    }
+    if (global.interactiveRolloverDstPosIdx !== undefined) {
+        var ptDest = solution.dest[global.interactiveRolloverDstPosIdx];
+        for (var i = 0; i < solution.positions.length; i++) {
+            if (equalsPt(solution.dest[i], ptDest)) {
+                var ptSrc = solution.positions[i];
+                var unnormaPtSrc = normalizePointToCanvas(ptSrc, 2);
+                var unnormaPtDest = normalizePointToCanvas(ptDest, 2);
+                sctx.fillRect(unnormaPtSrc.x - 5, unnormaPtSrc.y - 5, 10, 10);
+                pctx.fillRect(unnormaPtDest.x - 5, unnormaPtDest.y - 5, 10, 10);
+            }
+        }
+    }
+    if (global.interactiveRolloverFacetIdx !== undefined) {
+        var highlightFacetIdx = global.interactiveRolloverFacetIdx;
+        var highlightSubPtIdx = global.interactiveRolloverFacetSubpointIdx;
+        var facet = solution.facets[highlightFacetIdx];
+        var points = facet.map(function(ptIdx) { return solution.positions[ptIdx]; });
+        var pointsUnNorm  = points.map(function(pt) {
+            return normalizePointToCanvas(pt, 2);
+        });
+        drawLines(sctx, pointsUnNorm, "red", 7);
+
+        var destPoints = facet.map(function(ptIdx) { return solution.dest[ptIdx]; });
+        var destPtUnNorm = destPoints.map(function(pt) {
+            // May need to make smaller for out of bounds
+            return normalizePointToCanvas(pt, 2);
+        });
+        drawLines(pctx, destPtUnNorm, "red", 6);
+
+        if (global.interactiveRolloverFacetSubpointIdx !== undefined) {
+            var ptSrc = solution.positions[global.interactiveRolloverFacetSubpointIdx];
+            var ptDest = solution.dest[global.interactiveRolloverFacetSubpointIdx];
+            var unnormaPtSrc = normalizePointToCanvas(ptSrc, 2);
+            var unnormaPtDest = normalizePointToCanvas(ptDest, 2);
+            sctx.fillRect(unnormaPtSrc.x - 5, unnormaPtSrc.y - 5, 10, 10);
+            pctx.fillRect(unnormaPtDest.x - 5, unnormaPtDest.y - 5, 10, 10);
+        }
+    }
 }
 
 function displaySolution(solution) {
@@ -177,18 +240,66 @@ function displaySizeOfSolution(text) {
 function updateSolution(solution) {
     displaySolution(solution);
     drawSolution(solution);
-    // To add later
-    //generateInteractiveRollover(solution);
+    generateInteractiveRollover(solution);
 }
 
-function injectPtToSolution(solution, pt) {
+function interactiveRolloverPos(idx, isDest) {
+    global.interactiveRolloverFacetIdx = undefined;
+    if (isDest) {
+        global.interactiveRolloverPosIdx = undefined;
+        global.interactiveRolloverDstPosIdx = idx;
+    } else {
+        global.interactiveRolloverPosIdx = idx;
+        global.interactiveRolloverDstPosIdx = undefined;
+    }
+    drawSolution(lastKnownSolution);
+}
+function interactiveRolloverFacet(idx, subpointIdx) {
+    global.interactiveRolloverPosIdx = undefined;
+    global.interactiveRolloverFacetIdx = idx;
+    global.interactiveRolloverFacetSubpointIdx = subpointIdx;
+    drawSolution(lastKnownSolution);
+}
+
+function generateInteractiveRollover(solution) {
+    var rolloverElem = document.getElementById('interactiveRollover');
+
+    var output = "<div>Positions</div>";
+    for (var i = 0; i < solution.positions.length; i++) {
+        var pos = solution.positions[i];
+        output += '<div><a href=javascript: onmouseover="interactiveRolloverPos(' + i + ');" >(' + outputPt(pos) + ')</a></div>';
+    }
+
+    output += "<hr/><div>Facets</div>";
+    for (var i = 0; i < solution.facets.length; i++) {
+        output += '<div><a href=javascript: onmouseover="interactiveRolloverFacet(' + i + ');" ><b>' + i + ':</b></a>';
+        var facet = solution.facets[i];
+        for (var j = 0; j < facet.length; j++) {
+            output += ' <a href=javascript: onmouseover="interactiveRolloverFacet(' + i + ', ' + facet[j] + ');" >' + facet[j] + '</a>';
+        }
+        output += '</div>';
+    }
+
+    output += "<hr /><div>Destination Positions</div>";
+    for (var i = 0; i < solution.positions.length; i++) {
+        var pos = solution.dest[i];
+        output += '<div><a href=javascript: onmouseover="interactiveRolloverPos(' + i + ', true);" >(' + outputPt(pos) + ')</a></div>';
+    }
+
+    rolloverElem.innerHTML = output;
 }
 
 function generate() {
     var solutionTxt = document.getElementById('solutionTxt');
     var solution = parseSolution(solutionTxt.value);
+
+    global.interactiveRolloverPosIdx = undefined;
+    global.interactiveRolloverDstPosIdx = undefined;
+    global.interactiveRolloverFacetIdx = undefined;
+
     drawSolution(solution);
     displaySizeOfSolution(solutionTxt.value);
+    generateInteractiveRollover(solution);
 
     global.lastKnownSolution = solution; // for debugging
 
