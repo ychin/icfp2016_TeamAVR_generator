@@ -264,7 +264,7 @@ function displaySizeOfSolution(text) {
         sizeOfSolution++;
     }
 
-    document.getElementById('problemOutput').innerHTML = 'Size: ' + sizeOfSolution;
+    document.getElementById('problemOutput').innerHTML = 'Solution size: ' + sizeOfSolution;
 }
 
 function updateSolution(solution) {
@@ -335,6 +335,24 @@ function generate() {
     addUndo();
 }
 
+function runOps() {
+    var opsTxt = document.getElementById('operationsTxt');
+    var ops = JSON.parse(opsTxt.value);
+
+    if (ops.length == 0)
+        return;
+
+    for (var i = 0; i < ops.length; i++) {
+        var op = ops[i];
+        if (op.type == 'fold') {
+            applyPostFlip(lastKnownSolution, parsePt(op.line[0]), parsePt(op.line[1]), op.right);
+        }
+    }
+
+    updateSolution(lastKnownSolution);
+    addUndo();
+}
+
 function testFunc() {
     // This is for whatever debug testing for local testing
     var ratio = Math.random();
@@ -359,6 +377,13 @@ function selectDefaultProblem() {
     var solution = known_solutions[text];
     var solutionTxt = document.getElementById('solutionTxt');
     solutionTxt.value = solution.trim();
+}
+
+function selectDefaultOps() {
+    var text = global.opsSelect.options[global.opsSelect.selectedIndex].text;
+    var ops = known_operations[text];
+    var opsTxt = document.getElementById('operationsTxt');
+    opsTxt.value = JSON.stringify(ops, null, '  ');
 }
 
 function addFoldFunc() {
@@ -427,6 +452,7 @@ function OnLoad() {
     global.pctx = problemCanvas.getContext("2d");
 
     global.problemSelect = document.getElementById('defaultProblemSelect');
+    global.opsSelect = document.getElementById('defaultOpsSelect');
     var problemList = [];
     for (var problemName in known_solutions) {
         var option = document.createElement("option");
@@ -434,6 +460,12 @@ function OnLoad() {
         global.problemSelect.add(option);
     }
     selectDefaultProblem();
+    var opsList = [];
+    for (var opName in known_operations) {
+        var option = document.createElement("option");
+        option.text = opName;
+        global.opsSelect.add(option);
+    }
 
     drawLine(sctx, 0,0, canvasWidth, canvasWidth);
     drawLine(sctx, canvasWidth,0, 0, canvasWidth);

@@ -18,12 +18,15 @@
         <canvas id="solution_canvas" width="400" height="400"></canvas>
         <canvas id="problem_canvas" width="400" height="400"></canvas>
 
-        <textarea rows=20 cols=30 id=solutionTxt></textarea>
+        <textarea rows=20 cols=30 id=solutionTxt placeholder="Solution"></textarea>
+        <textarea rows=20 cols=30 id=operationsTxt placeholder="Operations"></textarea>
         <div style="display:block;float:right;overflow:auto;width:300px;height:300px;" id=interactiveRollover></div>
         </div>
         <div>
             <select id=defaultProblemSelect onchange="selectDefaultProblem();"></select>
-            <input type=button id=generateBtn value="Run!" onClick="generate();" />
+            <input type=button id=generateBtn value="Load" onClick="generate();" />
+            <select id=defaultOpsSelect onchange="selectDefaultOps();"><option></option></select>
+            <input type=button id=generateBtn value="Run Ops" onClick="runOps();" />
             <input type=button id=testBtn value="Test Only" onClick="testFunc();" />
             <label> <input type=checkbox id=showGridCheckbox onchange="applyShowGridFunc();" />Show Grid </label>
         </div>

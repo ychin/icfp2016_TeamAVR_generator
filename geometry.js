@@ -239,13 +239,14 @@ function calculateRightAngleTriFlip(vec) {
 ////////////////////////////////////////////////////////////////////////////////
 // Operations
 //
-function splitFacets(solution, pt1, pt2, useDest) {
+function splitFacets(solution, pt1, pt2, useDest, onlyInsideLineSegment) {
     // Assumption: (pt1, pt2) are from boundary. I.e. we can't split in the middle
     // TODO: is this always true? We don't have to respond physical paper properties
     for (var i = 0; i < solution.facets.length; i++) {
         var facet = solution.facets[i];
 
         var splitPts = [];
+        var splitAborted = false;
 
         for (var j = 0; j < facet.length; j++) {
             var nextJ = (j+1) % facet.length;
@@ -275,8 +276,8 @@ function splitFacets(solution, pt1, pt2, useDest) {
                 if (sign1 == 0) {
                     var lastIndex = (j-1+facet.length) % facet.length;
                     var prevSign = signOfPointOnLine(
-                    useDest ? solution.dest[facet[lastIndex]] : solution.positions[facet[lastIndex]],
-                    pt1, pt2 );
+                        useDest ? solution.dest[facet[lastIndex]] : solution.positions[facet[lastIndex]],
+                        pt1, pt2 );
                     if (prevSign ==sign2) {
                         // Both one the same side
                         continue;
@@ -286,6 +287,12 @@ function splitFacets(solution, pt1, pt2, useDest) {
                         continue;
                     }
                     else {
+                        var pointT = pointOnLineT(pt1, pt2, facetPt1);
+                        if (onlyInsideLineSegment && (pointT.compare(1) > 0 || pointT.compare(0) < 0)) {
+                            splitAborted = true;
+                            break;
+                        }
+
                         splitPts.push(j);
                     }
                 }
@@ -297,6 +304,12 @@ function splitFacets(solution, pt1, pt2, useDest) {
                 // line crosses over the two facet points
                 var t1t2 = {};
                 lineIntersecton(facetPt1, facetPt2, pt1, pt2, t1t2);
+
+                if (onlyInsideLineSegment && (t1t2.t1.compare(1) > 0 || t1t2.t1.compare(0) < 0)) {
+                    splitAborted = true;
+                    break;
+                }
+
                 var newPos = lerpPt(facetSrcPt1, facetSrcPt2, t1t2.t1);
                 solution.positions.push(newPos);
                 var newDestPos = lerpPt(facetDestPt1, facetDestPt2, t1t2.t1);
@@ -316,11 +329,15 @@ function splitFacets(solution, pt1, pt2, useDest) {
             //}
         }
 
+        if (splitAborted) {
+            continue;
+        }
+
         if (splitPts.length != 0 && splitPts.length != 2) {
             throw new Error("Weird number of split pts: " + splitPts.length);
         }
 
-        if (splitPts.length ==2 ) {
+        if (splitPts.length == 2) {
             var split1a = facet.slice(0, splitPts[0] + 1);
             var split2 = facet.slice(splitPts[0], splitPts[1] + 1);
             var split1b = facet.slice(splitPts[1], facet.length);
@@ -348,5 +365,119 @@ function applyPostFlip(solution, pt1, pt2, flip) {
             var newDestPt = calculateFlip(destPos, pt1, pt2);
             solution.dest[i] = newDestPt;
         }
+    }
+}
+
+function buildPosToFacet(solution) {
+    var posToFacet = {};
+    for (var i = 0; i < solution.positions.length; i++) {
+        posToFacet[i] = [];
+    }
+    for (var i = 0; i < solution.facets.length; i++) {
+        var facet = solution.facets[i];
+        for (var j = 0; j < facet.length; j++) {
+            posToFacet[facet[j]].push({
+                facet: i,
+                pt: j
+            });
+        }
+    }
+    return posToFacet;
+}
+
+function applyPostPullOpen(solution, pt1, pt2, flip) {
+    // WIP still
+    splitFacets(solution, pt1, pt2, true);
+
+    var posToFacet = buildPosToFacet(solution);
+
+    var pointsToFlip = {};
+    var pointsProcessed = {};
+    
+    for (var i = 0; i < solution.positions.length; i++) {
+        if (pointsProcessed[i]) {
+            continue;
+        }
+        var pos = solution.positions[i];
+        var destPos = solution.dest[i];
+        
+        var sign = signOfPointOnLine(destPos, pt1, pt2);
+        sign = flip ? -sign : sign;
+        var toFlipPos = sign > 0;
+        
+        if (toFlipPos) {
+            connectedFacets = posToFacet[i];
+            if (connectedFacets.length == 2) { // this only works if it's a single fold as far as I understand
+                var bothSimple = true;
+                for (var j = 0; j < connectedFacets.length; j++) {
+                    var facet = connectedFacets[j];
+                    
+                    // TODO: only use simple for now for testing
+                    var isSimple = true;
+                    for (var k = 0; k < facet.length; k++) {
+                        if (facet[k] == i)
+                            continue;
+
+                        var curSign = signOfPointOnLine(solution.dest[fact[k]], pt1, pt2);
+                        if (curSign == 0) { // on the line
+                            continue;
+                        }
+
+                        var curConnectedFacets = posToFacet[facet[k]];
+                        if (curConnectedFacets.length > 1) {
+                            isSimple = false;
+                            bothSimple = false;
+                        }
+                    }
+                }
+
+                if (bothSimple) {
+                    var facet1Info = connectedFacets[0];
+                    var facet2Info = connectedFacets[1];
+                    var facet1 = solution.facets[facet1Info.facet];
+                    var facet2 = solution.facets[facet2Info.facet];
+                    for (var k = 0; k < facet2.length; k++) {
+                        var curSign = signOfPointOnLine(solution.dest[facet2[k]], pt1, pt2);
+                        if (curSign == 0) { // on the line
+                            continue;
+                        }
+
+                        //pointsToFlip[facet2[k]] = true;
+                        pointsProcessed[facet2[k]] = true;
+                        pointsToFlip[facet2[k]] = false;
+                    }
+                    for (var k = 0; k < facet1.length; k++) {
+                        var curSign = signOfPointOnLine(solution.dest[facet2[k]], pt1, pt2);
+                        if (curSign == 0) { // on the line
+                            continue;
+                        }
+                        pointsProcessed[facet1[k]] = true;
+                        pointsToFlip[facet1[k]] = false;
+                    }
+                }
+                else {
+                    pointsToFlip[i] = true
+                }
+            }
+            else {
+                pointsToFlip[i] = true;
+            }
+        }
+
+
+            //var newDestPt = calculateFlip(destPos, pt1, pt2);
+            //solution.dest[i] = newDestPt;
+    }
+
+    for (var i = 0; i < solution.positions.length; i++) {
+        
+    }
+
+    for (var i in pointsToFlip) {
+        if (!pointsToFlip[i])
+            continue;
+        var destPos = solution.dest[i];
+        var newDestPt = calculateFlip(destPos, pt1, pt2);
+        solution.dest[i] = newDestPt;
     }
 }
