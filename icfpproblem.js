@@ -212,6 +212,28 @@ function applyFoldFlipRight() {
     // Doesn't do anything
 }
 
+function transformFunc() {
+    var s = lastKnownSolution;
+
+    var offsetPt = document.getElementById('translateOffset').value;
+    if (offsetPt != '') {
+        s.dest = s.dest.map(function(p) { return addPt(p, parsePt(offsetPt)); });
+    }
+
+    var flipAlongPt1 = document.getElementById('flipAlong1').value;
+    var flipAlongPt2 = document.getElementById('flipAlong2').value;
+    if (flipAlongPt1 != '' && flipAlongPt2 != '') {
+        var flipP1 = parsePt(flipAlongPt1);
+        var flipP2 = parsePt(flipAlongPt2);
+        s.dest = s.dest.map(function(p) { return calculateFlip(p, flipP1, flipP2); });
+    }
+
+    drawSolution(lastKnownSolution);
+    displaySolution(lastKnownSolution);
+
+    addUndo();
+}
+
 function addUndo() {
     var lastSolution = outputSolution(lastKnownSolution);
     undoStack.push(lastSolution);
