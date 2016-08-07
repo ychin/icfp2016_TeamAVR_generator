@@ -1,5 +1,5 @@
 
-var known_problems = {
+var known_solutions = {
 "basic": `
 4
 0,0

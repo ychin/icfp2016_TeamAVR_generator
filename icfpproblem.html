@@ -18,12 +18,20 @@
         <canvas id="problem_canvas" width="300" height="300"></canvas>
 
         <textarea rows=20 cols=50 id=solutionTxt></textarea>
-        <input type=button id=generateBtn value=Generate onClick="generate();" />
-        <script type="text/javascript" src="icfpproblem.js"></script>
+        </div>
+        <div>
+            <select id=defaultProblemSelect onchange="selectDefaultProblem();"></select>
+            <input type=button id=generateBtn value=Generate onClick="generate();" />
         </div>
 
         <div>
             <div id=log></div>
+            Problem Output:
+            <div id=problemOutput></div>
         </div>
+
+
+
+        <script type="text/javascript" src="icfpproblem.js"></script>
     </body>
 </html>

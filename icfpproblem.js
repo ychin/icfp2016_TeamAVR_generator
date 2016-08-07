@@ -2,11 +2,6 @@ var global = window;
 
 var canvasWidth=300;
 
-var solutionCanvas = document.getElementById('solution_canvas');
-var problemCanvas = document.getElementById('problem_canvas');
-var sctx = solutionCanvas.getContext('2d');
-var pctx = problemCanvas.getContext("2d");
-
 function drawLine(ctx, x1, y1, x2, y2) {
     ctx.beginPath();
     ctx.moveTo(x1, y1);
@@ -133,7 +128,32 @@ function log(text) {
     logElem.innerHTML = text;
 }
 
-drawLine(sctx, 0,0, canvasWidth, canvasWidth);
-drawLine(sctx, canvasWidth,0, 0, canvasWidth);
-drawLine(pctx, 0,0, canvasWidth, canvasWidth);
-drawLine(pctx, canvasWidth,0, 0, canvasWidth);
+function selectDefaultProblem() {
+    var text = global.problemSelect.options[global.problemSelect.selectedIndex].text;
+    var solution = known_solutions[text];
+    var solutionTxt = document.getElementById('solutionTxt');
+    solutionTxt.value = solution.trim();
+}
+
+function OnLoad() {
+    global.solutionCanvas = document.getElementById('solution_canvas');
+    global.problemCanvas = document.getElementById('problem_canvas');
+    global.sctx = solutionCanvas.getContext('2d');
+    global.pctx = problemCanvas.getContext("2d");
+
+    global.problemSelect = document.getElementById('defaultProblemSelect');
+    var problemList = [];
+    for (var problemName in known_solutions) {
+        var option = document.createElement("option");
+        option.text = problemName;
+        global.problemSelect.add(option);
+    }
+    selectDefaultProblem();
+
+    drawLine(sctx, 0,0, canvasWidth, canvasWidth);
+    drawLine(sctx, canvasWidth,0, 0, canvasWidth);
+    drawLine(pctx, 0,0, canvasWidth, canvasWidth);
+    drawLine(pctx, canvasWidth,0, 0, canvasWidth);
+}
+
+OnLoad();
