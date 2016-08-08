@@ -2,7 +2,7 @@
 
 This was a visualizer and tool written for the ICFP 2016 programming contest, from August 5 - 7, 2016. For more information see the specification page: http://2016.icfpcontest.org/
 
-This is a Github Page. You can go to https://ychin.github.io/icfp2016_TeamAVR_generator/ to see it.
+This is a GitHub Page. You can go to https://ychin.github.io/icfp2016_TeamAVR_generator/ to see it.
 
 ## Background
 I was only working part time remotely for the team ***Buy Ascension VR on Steam, $9.99*** who consists of people who I worked with in ICFP 2014 ([Team Cannon Brawl](https://github.com/ychin/icfp_2014_CannonBrawl)) / 2015 ([Team Bazaar](https://github.com/ychin/icfp_2015_BazaarGame)), and contributed to the problem generation part. We already had some hand crafted base problems, and I built a web page to help visualize them and generate new problems, by folding them and applying known sequence of steps, as well as a visualizer to help map where the points and facets are to help gauge how hard the problem is.
