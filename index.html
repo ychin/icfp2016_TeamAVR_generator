@@ -6,6 +6,10 @@
             canvas {
                 border-style: dotted;
             }
+            hr {
+                border: 0;
+                border-top: 1px solid #aaaaaa;
+            }
         </style>
 
         <script type="text/javascript" src="Fraction.js/fraction.js"></script>
@@ -15,57 +19,68 @@
     </head>
 
     <body>
-        <div>
-        <canvas id="solution_canvas" width="400" height="400"></canvas>
-        <canvas id="problem_canvas" width="400" height="400"></canvas>
+        <div id=wrapper style="min-height:100%;position:relative;">
+            <div id=content style="padding-bottom:60px;">
+                <div>
+                <canvas id="solution_canvas" width="400" height="400"></canvas>
+                <canvas id="problem_canvas" width="400" height="400"></canvas>
 
-        <textarea rows=20 cols=30 id=solutionTxt placeholder="Solution"></textarea>
-        <textarea rows=20 cols=30 id=operationsTxt placeholder="Actions"></textarea>
-        <div style="display:block;float:right;overflow:auto;width:300px;height:300px;" id=interactiveRollover></div>
-        </div>
-        <div>
-            <label> <input type=checkbox id=showGridCheckbox onchange="applyShowGridFunc();" />Show Grid </label>
-        </div>
-        <p>
-        </div>
-        <div>
-            <select id=defaultProblemSelect onchange="selectDefaultProblem();"></select>
-            <input type=button id=generateBtn value="Run Solution" onClick="generate();" />
-        </div><div>
-            <select id=defaultOpsSelect onchange="selectDefaultOps();"><option></option></select>
-            <input type=button value="Run Actions" onClick="runOps();" />
-            <input type=button value="Run Actions (detailed undo)" onClick="runOps(true);" />
-            <!--<input type=button id=testBtn value="Test Only" onClick="testFunc();" />-->
-        </div>
-        <div>
-            <form onsubmit="addFoldFunc();return false;" action="javascript:">
-                <input type=submit id=postFlipBtn value="Add Fold" />
-                <input id=postFlipPt1 value="0,1/4" />
-                <input id=postFlipPt2 value="1,0.25" />
-                <label> <input type=checkbox id=postFlipRight onchange="applyFoldFlipRight();" /> Fold right </label>
-            </form>
-        </div>
-        <div>
-            <form onsubmit="transformFunc();return false;" action="javascript:">
-                <input type=submit value="Transform" />
-                <input id=translateOffset value="" placeholder="Translate: x,y" />
-                <input id=flipAlong1 value="" placeholder="Flip line p1: x,y" />
-                <input id=flipAlong2 value="" placeholder="Flip line p2: x,y" />
-            </form>
-            <form onsubmit="tilingFunc();return false;" action="javascript:">
-                <input type=submit value="Tile" />
-                <input id=tilingValue value="" placeholder="Tiling: <num>" />
-            </form>
-        </div>
-        <div>
-            <input type=button value="Undo" onClick="applyUndo();" />
-            <input type=button value="Redo" onClick="applyRedo();" />
+                <textarea rows=20 cols=30 id=solutionTxt placeholder="Solution"></textarea>
+                <textarea rows=20 cols=30 id=operationsTxt placeholder="Actions"></textarea>
+                <div style="display:block;float:right;border-style:solid;border-color:#aaaaaa;border-width:1px;overflow:auto;width:300px;height:300px;" id=interactiveRollover></div>
+                </div>
+                <div>
+                    <label> <input type=checkbox id=showGridCheckbox onchange="applyShowGridFunc();" />Show Grid </label>
+                </div>
+                <p>
+                <div>
+                    <select id=defaultProblemSelect onchange="selectDefaultProblem();"></select>
+                    <input type=button id=generateBtn value="Run Solution" onClick="generate();" />
+                </div><div>
+                    <select id=defaultOpsSelect onchange="selectDefaultOps();"><option></option></select>
+                    <input type=button value="Run Actions" onClick="runOps();" />
+                    <input type=button value="Run Actions (detailed undo)" onClick="runOps(true);" />
+                    <!--<input type=button id=testBtn value="Test Only" onClick="testFunc();" />-->
+                </div>
+                <div>
+                    <form onsubmit="addFoldFunc();return false;" action="javascript:">
+                        <input type=submit id=postFlipBtn value="Add Fold" />
+                        <input id=postFlipPt1 value="0,1/4" />
+                        <input id=postFlipPt2 value="1,0.25" />
+                        <label> <input type=checkbox id=postFlipRight onchange="applyFoldFlipRight();" /> Fold right </label>
+                    </form>
+                </div>
+                <div>
+                    <form onsubmit="transformFunc();return false;" action="javascript:">
+                        <input type=submit value="Transform" />
+                        <input id=translateOffset value="" placeholder="Translate: x,y" />
+                        <input id=flipAlong1 value="" placeholder="Flip line p1: x,y" />
+                        <input id=flipAlong2 value="" placeholder="Flip line p2: x,y" />
+                    </form>
+                    <form onsubmit="tilingFunc();return false;" action="javascript:">
+                        <input type=submit value="Tile" />
+                        <input id=tilingValue value="" placeholder="Tiling: <num>" />
+                    </form>
+                </div>
+                <div>
+                    <input type=button value="Undo" onClick="applyUndo();" />
+                    <input type=button value="Redo" onClick="applyRedo();" />
+                </div>
+
+                <p>
+                    <div id=log></div>
+                    <div id=problemOutput></div>
+                </p>
+            </div>
+            <div id=footer style="position:absolute;bottom:0px;left:10px;right:10px;height:40px;">
+                    <hr/>
+                <div >
+                    © 2016 Yee Cheng Chin
+                    <a style="float:right;" href="https://github.com/ychin/icfp2016_TeamAVR_generator">Source Code</a>
+                </div>
+            </div>
         </div>
 
-        <p>
-            <div id=log></div>
-            <div id=problemOutput></div>
-        </p>
         <script type="text/javascript" src="icfpproblem.js"></script>
     </body>
 </html>
