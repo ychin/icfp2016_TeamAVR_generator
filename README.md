@@ -1,4 +1,4 @@
-# ICFP 2016 Contest
+# ICFP 2016 Contest problem generation tool
 
 This was a visualizer and tool written for the ICFP 2016 programming contest, from August 5 - 7, 2016. For more information see the specification page: http://2016.icfpcontest.org/
 
