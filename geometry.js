@@ -361,6 +361,10 @@ function splitFacets(solution, pt1, pt2, useDest, onlyInsideLineSegment) {
     }
 }
 
+function applyPreFlip(solution, pt1, pt2, flip) {
+    // WIP: Doesn't work yet
+}
+
 function applyPostFlip(solution, pt1, pt2, flip) {
     splitFacets(solution, pt1, pt2, true);
     
@@ -394,7 +398,7 @@ function buildPosToFacet(solution) {
 }
 
 function applyPostPullOpen(solution, pt1, pt2, flip) {
-    // WIP still
+    // WIP still. Not fulling working
     splitFacets(solution, pt1, pt2, true);
 
     var posToFacet = buildPosToFacet(solution);
@@ -617,16 +621,4 @@ function generateTilingSolutions(solution, numTiling) {
     var mergedSolution = mergeSolutions(newSolutions);
     return mergedSolution;
 }
-
-function oneFourthSolution(solution) {
-    var newSolutions = [
-        generateScaledVersion(solution, new Fraction(0.5), genPt(0  ,0), false, false),
-        generateScaledVersion(solution, new Fraction(0.5), genPt(0.5,0), true, false),
-        generateScaledVersion(solution, new Fraction(0.5), genPt(0  ,0.5), false, true),
-        generateScaledVersion(solution, new Fraction(0.5), genPt(0.5,0.5), true, true) ];
-
-    var mergedSolution = mergeSolutions(newSolutions);
-    return mergedSolution;
-}
-
 

@@ -2,13 +2,14 @@
     <head>
         <style>
             div {
-                /* background-image:url(http://www.google.com/intl/en_ALL/images/srpr/logo1w.png); */
             }
             canvas {
                 border-style: dotted;
             }
         </style>
+
         <script type="text/javascript" src="Fraction.js/fraction.js"></script>
+
         <script type="text/javascript" src="known_solutions.js"></script>
         <script type="text/javascript" src="geometry.js"></script>
     </head>
@@ -19,18 +20,22 @@
         <canvas id="problem_canvas" width="400" height="400"></canvas>
 
         <textarea rows=20 cols=30 id=solutionTxt placeholder="Solution"></textarea>
-        <textarea rows=20 cols=30 id=operationsTxt placeholder="Operations"></textarea>
+        <textarea rows=20 cols=30 id=operationsTxt placeholder="Actions"></textarea>
         <div style="display:block;float:right;overflow:auto;width:300px;height:300px;" id=interactiveRollover></div>
         </div>
         <div>
+            <label> <input type=checkbox id=showGridCheckbox onchange="applyShowGridFunc();" />Show Grid </label>
+        </div>
+        <p>
+        </div>
+        <div>
             <select id=defaultProblemSelect onchange="selectDefaultProblem();"></select>
-            <input type=button id=generateBtn value="Load Solution" onClick="generate();" />
+            <input type=button id=generateBtn value="Run Solution" onClick="generate();" />
         </div><div>
             <select id=defaultOpsSelect onchange="selectDefaultOps();"><option></option></select>
-            <input type=button value="Run Ops" onClick="runOps();" />
-            <input type=button value="Run Ops (detailed undo)" onClick="runOps(true);" />
-            <input type=button id=testBtn value="Test Only" onClick="testFunc();" />
-            <label> <input type=checkbox id=showGridCheckbox onchange="applyShowGridFunc();" />Show Grid </label>
+            <input type=button value="Run Actions" onClick="runOps();" />
+            <input type=button value="Run Actions (detailed undo)" onClick="runOps(true);" />
+            <!--<input type=button id=testBtn value="Test Only" onClick="testFunc();" />-->
         </div>
         <div>
             <form onsubmit="addFoldFunc();return false;" action="javascript:">
@@ -57,14 +62,10 @@
             <input type=button value="Redo" onClick="applyRedo();" />
         </div>
 
-        <div>
+        <p>
             <div id=log></div>
-            Problem Output:
             <div id=problemOutput></div>
-        </div>
-
-
-
+        </p>
         <script type="text/javascript" src="icfpproblem.js"></script>
     </body>
 </html>

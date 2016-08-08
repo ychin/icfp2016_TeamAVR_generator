@@ -1,6 +1,6 @@
 
 var known_solutions = {
-"basic": `
+"Basic": `
 4
 0,0
 0,1
@@ -13,7 +13,7 @@ var known_solutions = {
 1,1
 1,0
 `,
-"brad1": `
+"Problem1": `
 17
 0,0
 1/2,0
@@ -62,7 +62,7 @@ var known_solutions = {
 1/2,3/8
 1/2,1/2
 `,
-"brad2":`
+"Problem2":`
 18
 0,0
 1/4,0
@@ -122,7 +122,7 @@ var known_solutions = {
 1/2,1/4
 1/4,1/4
 `,
-"ycc1":`
+"Slanted Fold":`
 10
 0,0
 0,1
@@ -150,7 +150,7 @@ var known_solutions = {
 7/223,251/892
 7/26,27/52
 `,
-'ycc_stripTriConfusion':`
+'Tri Strip Confusion':`
 37
 0,0
 0,1
@@ -264,7 +264,7 @@ var known_solutions = {
 
 // These are steps to reproduce known sequences, so we have context how they are generated and can be modified as well
 var known_operations = {
-    "ycc_stripTriConfusion": [
+    "Tri Strip Confusion Ops": [
         {
             type: 'fold',
             line: [ '0,0', '1,1' ]
@@ -301,7 +301,7 @@ var known_operations = {
             line: [ '.5,0', '.5,1' ]
         }
     ],
-    'make_bloated': [
+    'Make Bloated': [
         {
             type: 'tile',
             num: 3,
