@@ -24,10 +24,11 @@
         </div>
         <div>
             <select id=defaultProblemSelect onchange="selectDefaultProblem();"></select>
-            <input type=button id=generateBtn value="Load" onClick="generate();" />
+            <input type=button id=generateBtn value="Load Solution" onClick="generate();" />
+        </div><div>
             <select id=defaultOpsSelect onchange="selectDefaultOps();"><option></option></select>
-            <input type=button id=generateBtn value="Run Ops" onClick="runOps();" />
-            <input type=button id=generateBtn value="Run Ops (detailed undo)" onClick="runOps(true);" />
+            <input type=button value="Run Ops" onClick="runOps();" />
+            <input type=button value="Run Ops (detailed undo)" onClick="runOps(true);" />
             <input type=button id=testBtn value="Test Only" onClick="testFunc();" />
             <label> <input type=checkbox id=showGridCheckbox onchange="applyShowGridFunc();" />Show Grid </label>
         </div>
